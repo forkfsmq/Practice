@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Цифровой пропуск: {{ pass_obj.pass_code|default:"PASS-2026-B201-STAS" }} — CoWork.Hub{% endblock %}
+
+{% block content %}
+<div class="container">
+  <!-- Page Header -->
+  <header class="section-header text-center">
+    <div class="section-tag">Электронный доступ</div>
+    <h1 class="section-title">Цифровой пропуск резидента</h1>
+    <p class="section-subtitle">
+      Приложите QR-код к считывателю турникета на входе в коворкинг или воспользуйтесь PIN-кодом для ячейки хранения.
+    </p>
+  </header>
+
+  <div class="pass-wrapper">
+    <article class="pass-card" aria-label="Карточка цифрового пропуска">
+      <!-- Card Header -->
+      <div class="pass-header">
+        <div class="brand-link flex-center">
+          <span class="brand-icon" aria-hidden="true">CW</span>
+          <span class="brand-name brand-name-white">CoWork<span>.Hub</span></span>
+        </div>
+        <p class="form-text pass-subtitle">
+          Гостевой пропуск на день • ДЕЙСТВИТЕЛЕН
+        </p>
+      </div>
+
+      <!-- Card Body with QR Code -->
+      <div class="pass-body">
+        <div class="qr-code-box">
+          <img src="{% static 'img/qr-code.svg' %}" alt="QR-код для турникета" width="180" height="180" class="space-img">
+        </div>
+
+        <h2 class="filter-heading pass-code-title">
+          {{ pass_obj.pass_code|default:"PASS-2026-B201-STAS" }}
+        </h2>
+
+        <div class="summary-row mt-4">
+          <span>Гость / Резидент:</span>
+          <strong>{{ pass_obj.guest_name|default:"Станислав Перкакуев" }}</strong>
+        </div>
+        <div class="summary-row">
+          <span>Рабочее место:</span>
+          <strong>
+            {% if booking.workplace %}
+              Стол {{ booking.workplace.number }} ({{ booking.workplace.get_zone_display }})
+            {% elif booking.meeting_room %}
+              Переговорная «{{ booking.meeting_room.name }}»
+            {% else %}
+              Стол B-201 (Тихая зона, 2 этаж)
+            {% endif %}
+          </strong>
+        </div>
+        <div class="summary-row">
+          <span>Дата действия:</span>
+          <strong>{{ pass_obj.valid_date|date:"d.m.Y"|default:"18.11.2026" }} (08:00–22:00)</strong>
+        </div>
+
+        <div class="card card-body mt-4 summary-banner text-center">
+          <span class="form-text">PIN-код локера для вещей:</span>
+          <div class="pin-display">
+            <span class="pin-digit">4</span>
+            <span class="pin-digit">8</span>
+            <span class="pin-digit">1</span>
+            <span class="pin-digit">9</span>
+          </div>
+          <span class="form-text">Ячейка № 14 • 2 этаж гардероба</span>
+        </div>
+
+        <div class="summary-row mt-4">
+          <span>Сеть Wi-Fi:</span>
+          <strong>CoWork-HighSpeed (5 ГГц)</strong>
+        </div>
+        <div class="summary-row">
+          <span>Пароль Wi-Fi:</span>
+          <strong>cowork2026</strong>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="grid-2-cols mt-6">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="alert('Пропуск успешно добавлен в Apple Wallet!')">
+            📱 Apple Wallet
+          </button>
+          <button type="button" class="btn btn-primary btn-sm" onclick="alert('Пропуск отправлен в ваш Telegram бот!')">
+            ✈️ В Telegram
+          </button>
+        </div>
+
+        <button type="button" class="btn btn-outline btn-block mt-2" onclick="window.print()">
+          🖨️ Распечатать пропуск
+        </button>
+      </div>
+    </article>
+  </div>
+</div>
+{% endblock %}

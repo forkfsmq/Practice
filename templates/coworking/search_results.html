@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Результаты поиска — CoWork.Hub{% endblock %}
+
+{% block content %}
+<div class="container">
+  <!-- Page Header -->
+  <header class="section-header text-center">
+    <div class="section-tag">Поиск свободных мест</div>
+    <h1 class="section-title">Результаты поиска</h1>
+    <p class="section-subtitle">
+      {% if zone %}Фильтр по зоне: <strong>{{ zone }}</strong> • {% endif %}
+      Дата: <strong>{{ date|default:"18.11.2026" }}</strong> • Длительность: <strong>{{ hours|default:"8" }} ч.</strong>
+    </p>
+  </header>
+
+  <!-- Spaces Grid -->
+  <div class="spaces-grid">
+    {% for wp in page_obj %}
+      <article class="space-card">
+        <div class="space-img-container">
+          {% if wp.zone == 'open_space' %}
+            <img src="{% static 'img/workplace-openspace.svg' %}" alt="Стол {{ wp.number }}" width="400" height="240" loading="lazy" class="space-img">
+          {% elif wp.zone == 'quiet_zone' %}
+            <img src="{% static 'img/workplace-quiet.svg' %}" alt="Стол {{ wp.number }}" width="400" height="240" loading="lazy" class="space-img">
+          {% else %}
+            <img src="{% static 'img/workplace-window.svg' %}" alt="Стол {{ wp.number }}" width="400" height="240" loading="lazy" class="space-img">
+          {% endif %}
+          <div class="space-status-badge">
+            <span class="badge badge-success">
+              <span class="badge-dot badge-dot-success"></span> Доступно на весь день
+            </span>
+          </div>
+          <div class="space-price-tag">{{ wp.price_per_hour|floatformat:0 }} ₽/ч</div>
+        </div>
+
+        <div class="space-body">
+          <h3 class="space-title">Рабочее место {{ wp.number }}</h3>
+          <div class="space-details">
+            <span>{{ wp.floor }} этаж</span>
+            <span>•</span>
+            <span>{{ wp.get_zone_display }}</span>
+          </div>
+          <p class="form-text">
+            {{ wp.description|default:"Комфортное место с эргономичным креслом и скоростным Wi-Fi."|truncatechars:85 }}
+          </p>
+
+          <div class="space-amenities">
+            {% if wp.has_monitor %}<span class="amenity-tag">🖥️ 4K Монитор</span>{% endif %}
+            {% if wp.has_sockets %}<span class="amenity-tag">⚡ Розетки Type-C</span>{% endif %}
+            <span class="amenity-tag">📶 Wi-Fi 500 Мбит</span>
+          </div>
+
+          <a href="{% url 'coworking:booking_detail' wp.id %}" class="btn btn-primary btn-block">
+            Выбрать часы
+          </a>
+        </div>
+      </article>
+    {% empty %}
+      <div class="card card-body text-center empty-card-state">
+        <h3>Мест по вашему запросу не найдено</h3>
+        <p class="form-text mt-2">Попробуйте изменить параметры поиска или выбрать другую дату.</p>
+        <div class="mt-4">
+          <a href="{% url 'coworking:catalog' %}" class="btn btn-primary">Перейти в общий каталог</a>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination (Requirement: 20 per page) -->
+  {% if page_obj.has_other_pages %}
+    <nav aria-label="Пагинация результатов">
+      <ul class="pagination">
+        {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}&zone={{ zone }}&date={{ date }}&hours={{ hours }}">‹ Назад</a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">‹ Назад</span></li>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+          {% if page_obj.number == num %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+          {% else %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ num }}&zone={{ zone }}&date={{ date }}&hours={{ hours }}">{{ num }}</a>
+            </li>
+          {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}&zone={{ zone }}&date={{ date }}&hours={{ hours }}">Вперёд ›</a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">Вперёд ›</span></li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% endif %}
+</div>
+{% endblock %}

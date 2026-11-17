@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Оплата бронирования #BK-{{ booking.id|default:"2026-8814" }} — CoWork.Hub{% endblock %}
+
+{% block content %}
+<div class="container">
+  <!-- Page Header -->
+  <header class="section-header text-center">
+    <div class="section-tag">Оформление заказа</div>
+    <h1 class="section-title">Оплата бронирования</h1>
+    <p class="section-subtitle">
+      Заказ #BK-{{ booking.id|default:"2026-8814" }}. Проверьте детали бронирования и выберите удобный способ онлайн-оплаты.
+    </p>
+  </header>
+
+  <div class="booking-grid">
+    <!-- Left Column: Payment Form -->
+    <div class="slot-container">
+      <form action="{% url 'coworking:checkout' booking.id %}" method="post" id="checkoutForm" novalidate>
+        {% csrf_token %}
+
+        <h2 class="filter-heading">1. Способ оплаты</h2>
+        <div class="form-group">
+          <label class="form-check card card-body payment-method-card">
+            <input type="radio" name="payment_method" value="card_mir" class="form-check-input" checked>
+            <div class="form-check-label">
+              <strong>Банковская карта МИР / Visa / Mastercard</strong>
+              <div class="form-text">Мгновенное зачисление без комиссии. Чек на email.</div>
+            </div>
+          </label>
+
+          <label class="form-check card card-body payment-method-card">
+            <input type="radio" name="payment_method" value="sbp" class="form-check-input">
+            <div class="form-check-label">
+              <strong>Система быстрых платежей (СБП)</strong>
+              <div class="form-text">Оплата в приложении вашего банка по QR-коду со скидкой 0%.</div>
+            </div>
+          </label>
+
+          <label class="form-check card card-body payment-method-card">
+            <input type="radio" name="payment_method" value="balance" class="form-check-input">
+            <div class="form-check-label">
+              <strong>С баланса резидента (доступно 4 800 ₽)</strong>
+              <div class="form-text">Списание в 1 клик с личного лицевого счета CoWork.Hub.</div>
+            </div>
+          </label>
+        </div>
+
+        <h2 class="filter-heading mt-6">2. Данные плательщика</h2>
+        <div class="form-group">
+          <label for="payerName" class="form-label">Плательщик *</label>
+          <input type="text" id="payerName" name="payer_name" class="form-control" value="{{ booking.user.get_full_name|default:'Станислав Перкакуев' }}" required>
+          <span class="form-error is-hidden" id="payerNameError">Укажите имя плательщика.</span>
+        </div>
+
+        <div class="form-group">
+          <label for="payerEmail" class="form-label">Email для получения электронного чека и QR-пропуска *</label>
+          <input type="email" id="payerEmail" name="payer_email" class="form-control" value="{{ booking.user.email|default:'stas@coworkhub.ru' }}" required>
+          <span class="form-error is-hidden" id="payerEmailError">Введите корректный email.</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-check">
+            <input type="checkbox" name="agree_terms" id="agreeTerms" class="form-check-input" checked required>
+            <span class="form-check-label">
+              Я ознакомлен и согласен с <a href="{% url 'coworking:rules' %}" target="_blank">правилами коворкинга</a> и условиями оферты
+            </span>
+          </label>
+          <span class="form-error is-hidden" id="agreeError">Необходимо согласиться с правилами коворкинга.</span>
+        </div>
+      </form>
+    </div>
+
+    <!-- Right Column: Order Summary Receipt -->
+    <aside class="booking-summary-card" aria-label="Чек заказа">
+      <h2 class="filter-heading">Состав заказа</h2>
+
+      <div class="summary-row">
+        <span>Номер брони:</span>
+        <strong>#BK-{{ booking.id }}</strong>
+      </div>
+      <div class="summary-row">
+        <span>Пространство:</span>
+        <strong>
+          {% if booking.workplace %}
+            Стол {{ booking.workplace.number }} ({{ booking.workplace.get_zone_display }})
+          {% elif booking.meeting_room %}
+            Переговорная «{{ booking.meeting_room.name }}»
+          {% else %}
+            Рабочее место
+          {% endif %}
+        </strong>
+      </div>
+      <div class="summary-row">
+        <span>Дата брони:</span>
+        <strong>{{ booking.start_datetime|date:"d.m.Y" }}</strong>
+      </div>
+      <div class="summary-row">
+        <span>Время:</span>
+        <strong>{{ booking.start_datetime|date:"H:i" }} – {{ booking.end_datetime|date:"H:i" }}</strong>
+      </div>
+      <div class="summary-row">
+        <span>Тариф:</span>
+        <span>{{ booking.tariff.name|default:"Почасовой со скидкой" }}</span>
+      </div>
+
+      <div class="summary-total">
+        <span class="summary-total-label">Сумма к списанию:</span>
+        <span class="summary-total-price">{{ booking.total_price|floatformat:0 }} ₽</span>
+      </div>
+
+      <button type="submit" form="checkoutForm" class="btn btn-success btn-lg btn-block mt-6" id="payBtn">
+        Оплатить {{ booking.total_price|floatformat:0 }} ₽
+      </button>
+
+      <p class="form-text text-center mt-2">
+        🔒 Платёж защищён 3D-Secure 2.0 по стандарту ГОСТ Р 57580.1
+      </p>
+    </aside>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/validation.js' %}"></script>
+{% endblock %}

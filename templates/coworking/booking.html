@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Бронирование: {{ resource_name }} — CoWork.Hub{% endblock %}
+
+{% block content %}
+<div class="container">
+  <!-- Page Header -->
+  <header class="section-header text-center">
+    <div class="section-tag">Выбор времени и слотов</div>
+    <h1 class="section-title">Бронирование: {{ resource_name }}</h1>
+    <p class="section-subtitle">
+      Почасовая сетка с 08:00 до 22:00. При бронировании от 6 часов автоматически применяется скидка -20%.
+    </p>
+  </header>
+
+  <div class="booking-grid">
+    <!-- Left Column: Resource Card & Slot Matrix -->
+    <div class="slot-container">
+      <!-- Resource summary banner -->
+      <div class="card card-body summary-banner">
+        <div class="flex-between-wrap">
+          <div>
+            <h2 class="space-title space-title-sm">{{ resource_name }}</h2>
+            <div class="space-details">
+              {% if workplace %}
+                <span>Этаж {{ workplace.floor }}</span>
+                <span>•</span>
+                <span>{{ workplace.get_zone_display }}</span>
+              {% elif room %}
+                <span>Этаж {{ room.floor }}</span>
+                <span>•</span>
+                <span>Вместимость: {{ room.capacity }} человек</span>
+              {% endif %}
+            </div>
+          </div>
+          <div>
+            <span class="badge badge-success badge-rate">
+              Базовый тариф: <strong id="baseRate">{{ hourly_rate|floatformat:0 }}</strong> ₽/час
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Booking Form -->
+      <form action="{% url 'coworking:booking_detail' resource_id %}{% if resource_type == 'room' %}?type=room{% endif %}" method="post" id="bookingForm" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="resource_type" value="{{ resource_type }}">
+        <input type="hidden" name="resource_id" value="{{ resource_id }}">
+        <input type="hidden" name="selected_slots" id="selectedSlotsInput" value="10,11,12,13,14,15,16,17">
+        <input type="hidden" name="total_price_calculated" id="totalPriceInput" value="2240">
+
+        <!-- Date Picker Field -->
+        <div class="form-group">
+          <label for="bookingDate" class="form-label">Дата бронирования *</label>
+          <input type="date" id="bookingDate" name="slot_date" class="form-control" value="2026-11-18" required>
+          <span class="form-text">Выберите рабочий день для просмотра доступных часов.</span>
+          <span class="form-error is-hidden" id="dateError">Пожалуйста, выберите корректную дату.</span>
+        </div>
+
+        <!-- Slot Matrix (14 hours: 08:00 to 22:00) -->
+        <div class="form-group">
+          <div class="form-label flex-between">
+            <span>Сетка часов (08:00 – 22:00) *</span>
+            <span class="form-text" id="slotCounterText">Выбрано: 8 часов</span>
+          </div>
+
+          <div class="slot-legend">
+            <div class="legend-item">
+              <span class="legend-color free"></span>
+              <span>Свободно</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color occupied"></span>
+              <span>Занято (коллизия)</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color selected"></span>
+              <span>Выбрано вами</span>
+            </div>
+          </div>
+
+          <div class="slot-hours-grid" id="slotsMatrix">
+            <!-- 08:00 to 22:00 (14 slots) -->
+            <button type="button" class="slot-cell" data-hour="8">08:00–09:00</button>
+            <button type="button" class="slot-cell occupied" data-hour="9" disabled title="Занято резидентом">09:00–10:00</button>
+            <button type="button" class="slot-cell selected" data-hour="10">10:00–11:00</button>
+            <button type="button" class="slot-cell selected" data-hour="11">11:00–12:00</button>
+            <button type="button" class="slot-cell selected" data-hour="12">12:00–13:00</button>
+            <button type="button" class="slot-cell selected" data-hour="13">13:00–14:00</button>
+            <button type="button" class="slot-cell selected" data-hour="14">14:00–15:00</button>
+            <button type="button" class="slot-cell selected" data-hour="15">15:00–16:00</button>
+            <button type="button" class="slot-cell selected" data-hour="16">16:00–17:00</button>
+            <button type="button" class="slot-cell selected" data-hour="17">17:00–18:00</button>
+            <button type="button" class="slot-cell" data-hour="18">18:00–19:00</button>
+            <button type="button" class="slot-cell" data-hour="19">19:00–20:00</button>
+            <button type="button" class="slot-cell" data-hour="20">20:00–21:00</button>
+            <button type="button" class="slot-cell" data-hour="21">21:00–22:00</button>
+          </div>
+          <span class="form-error is-hidden" id="slotError">Выберите хотя бы один доступный слот времени.</span>
+        </div>
+
+        <!-- Extra Services Checkboxes -->
+        {% if extra_services %}
+          <div class="form-group">
+            <span class="form-label">Дополнительные услуги</span>
+            {% for srv in extra_services %}
+              <label class="form-check">
+                <input type="checkbox" name="services" value="{{ srv.id }}" data-price="{{ srv.price|floatformat:0 }}" class="form-check-input extra-service-checkbox">
+                <span class="form-check-label">
+                  {{ srv.name }} (+{{ srv.price|floatformat:0 }} ₽ {{ srv.unit }})
+                </span>
+              </label>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <!-- Resident / Guest Details -->
+        <div class="form-group">
+          <label for="residentName" class="form-label">ФИО гостя или резидента *</label>
+          <input type="text" id="residentName" name="guest_name" class="form-control" value="Станислав Перкакуев" required>
+          <span class="form-error is-hidden" id="nameError">Укажите ваше имя (не менее 3 символов).</span>
+        </div>
+
+        <div class="form-group">
+          <label for="residentPhone" class="form-label">Номер телефона *</label>
+          <input type="tel" id="residentPhone" name="guest_phone" class="form-control" value="+7 (999) 123-45-67" placeholder="+7 (xxx) xxx-xx-xx" required>
+          <span class="form-error is-hidden" id="phoneError">Введите номер телефона в формате +7 (xxx) xxx-xx-xx.</span>
+        </div>
+
+        <div class="form-group">
+          <label for="residentEmail" class="form-label">Электронная почта для цифрового пропуска *</label>
+          <input type="email" id="residentEmail" name="guest_email" class="form-control" value="stas@coworkhub.ru" required>
+          <span class="form-error is-hidden" id="emailError">Введите корректный адрес электронной почты.</span>
+        </div>
+      </form>
+    </div>
+
+    <!-- Right Column: Dynamic Price Summary Card -->
+    <aside class="booking-summary-card" aria-label="Сводка стоимости бронирования">
+      <h2 class="filter-heading">Сводка бронирования</h2>
+
+      <div class="discount-badge" id="discountBadge">
+        🎉 Применена дневная скидка -20% (от 6 часов)
+      </div>
+
+      <div class="summary-row">
+        <span>Пространство:</span>
+        <strong>{{ resource_name }}</strong>
+      </div>
+      <div class="summary-row">
+        <span>Дата:</span>
+        <strong id="summaryDate">18.11.2026</strong>
+      </div>
+      <div class="summary-row">
+        <span>Длительность:</span>
+        <strong id="summaryHours">8 часов (10:00–18:00)</strong>
+      </div>
+      <div class="summary-row">
+        <span>Почасовая сумма:</span>
+        <span id="summaryHourlyBase">2 800 ₽</span>
+      </div>
+      <div class="summary-row" id="summaryDiscountRow">
+        <span class="text-warning">Скидка дня (-20%):</span>
+        <strong class="text-warning" id="summaryDiscountVal">-560 ₽</strong>
+      </div>
+      <div class="summary-row">
+        <span>Дополнительные услуги:</span>
+        <strong id="summaryServices">0 ₽</strong>
+      </div>
+
+      <div class="summary-total">
+        <span class="summary-total-label">Итого к оплате:</span>
+        <span class="summary-total-price" id="summaryTotalPrice">2 240 ₽</span>
+      </div>
+
+      <button type="submit" form="bookingForm" class="btn btn-primary btn-lg btn-block mt-6" id="submitBookingBtn">
+        Перейти к оплате →
+      </button>
+
+      <p class="form-text text-center mt-2">
+        🔒 Безопасная оплата. Мгновенная выдача пропуска.
+      </p>
+    </aside>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/slot_booking.js' %}"></script>
+<script src="{% static 'js/validation.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Правила коворкинга и тарифы — CoWork.Hub{% endblock %}
+
+{% block content %}
+<div class="container">
+  <!-- Page Header -->
+  <header class="section-header text-center">
+    <div class="section-tag">Информация и регламент</div>
+    <h1 class="section-title">Правила пространства и тарифы</h1>
+    <p class="section-subtitle">
+      Мы создали комфортную среду для продуктивной работы каждого резидента. Ознакомьтесь с основными правилами и политикой отмены.
+    </p>
+  </header>
+
+  <div class="catalog-layout">
+    <!-- Left Navigation -->
+    <aside class="filter-panel" aria-label="Разделы правил">
+      <h2 class="filter-heading">Разделы</h2>
+      <ul class="footer-links">
+        <li><a href="#tariffs" class="nav-link">Тарифная сетка</a></li>
+        <li><a href="#zones" class="nav-link">Зонирование и тишина</a></li>
+        <li><a href="#cancellation" class="nav-link">Отмена и возврат</a></li>
+        <li><a href="#guest" class="nav-link">Гостевой доступ</a></li>
+        <li><a href="#faq" class="nav-link">Частые вопросы</a></li>
+      </ul>
+      <a href="{% url 'coworking:catalog' %}" class="btn btn-primary btn-block mt-6">
+        Выбрать место
+      </a>
+    </aside>
+
+    <!-- Main Content Area -->
+    <section aria-label="Текст правил и тарифов">
+      <!-- Section 1: Tariffs -->
+      <article class="card card-body mb-6" id="tariffs">
+        <h2 class="section-title section-subheading">1. Тарифная политика</h2>
+        <p>В CoWork.Hub действует гибкая тарификация, позволяющая платить только за необходимое время:</p>
+        <ul class="tariff-features-list mt-4">
+          <li><strong>Почасовой тариф:</strong> от 250 ₽/час за базовое место в Open Space до 400 ₽/час за место у панорамного окна с 4K-монитором.</li>
+          <li><strong>Дневной тариф (со скидкой 20%):</strong> при выборе от 6 часов непрерывной брони система автоматически снижает итоговую стоимость на 20%.</li>
+          <li><strong>Месячный абонемент:</strong> фиксированное рабочее место с доступом 24/7, персональным локером и 10 часами в переговорных комнатах.</li>
+        </ul>
+      </article>
+
+      <!-- Section 2: Zones -->
+      <article class="card card-body mb-6 mt-6" id="zones">
+        <h2 class="section-title section-subheading">2. Зонирование и правила тишины</h2>
+        <p>Пространство разделено на два функциональных этажа:</p>
+        <ul class="tariff-features-list mt-4">
+          <li><strong>1 этаж — Open Space & Места у окна:</strong> зона для командной и индивидуальной работы. Разрешены негромкие звонки в гарнитуре и обсуждения рабочих вопросов.</li>
+          <li><strong>2 этаж — Тихая зона (Концентрация):</strong> строгий режим тишины. Звонки по телефону и голосовые сообщения запрещены. Все мобильные устройства должны быть переведены в беззвучный режим.</li>
+          <li><strong>Переговорные «Сириус», «Вега», «Альтаир»:</strong> звукоизолированные комнаты с видеоконференцсвязью для встреч от 4 до 6 человек. Бронируются отдельно по часам.</li>
+        </ul>
+      </article>
+
+      <!-- Section 3: Cancellation -->
+      <article class="card card-body mb-6 mt-6" id="cancellation">
+        <h2 class="section-title section-subheading">3. Политика продления и отмены</h2>
+        <p>
+          Мы понимаем, что планы могут меняться, поэтому условия отмены максимально прозрачны:
+        </p>
+        <ul class="tariff-features-list mt-4">
+          <li>Бесплатная отмена бронирования возможна не позднее чем за <strong>2 часа</strong> до начала забронированного слота. Сумма возвращается в полном объёме на баланс резидента или исходную карту.</li>
+          <li>Продление текущего бронирования доступно прямо из личного кабинета в 1 клик, при условии отсутствия броней других пользователей на следующий час.</li>
+          <li>В случае задержки более чем на 15 минут без продления стол может быть освобожден для общего доступа.</li>
+        </ul>
+      </article>
+
+      <!-- Section 4: FAQ -->
+      <article class="card card-body mt-6" id="faq">
+        <h2 class="section-title section-subheading">4. Часто задаваемые вопросы (FAQ)</h2>
+        <div class="mt-4">
+          <h4>Как войти в коворкинг после бронирования?</h4>
+          <p class="form-text mt-2">
+            После успешной оплаты формируется цифровой пропуск с QR-кодом. Вы можете показать его с экрана смартфона или привязать к Apple Wallet.
+          </p>
+
+          <h4 class="mt-4">Включены ли напитки и интернет в стоимость?</h4>
+          <p class="form-text mt-2">
+            Да! Высокоскоростной Wi-Fi (500 Мбит/с), свежий зерновой кофе, чай и фильтрованная вода бесплатны для всех гостей и резидентов.
+          </p>
+
+          <h4 class="mt-4">Можно ли пригласить клиента в переговорную?</h4>
+          <p class="form-text mt-2">
+            Да. При бронировании переговорной комнаты ваши гости проходят на ресепшене по фамилии организатора без дополнительной оплаты.
+          </p>
+        </div>
+      </article>
+    </section>
+  </div>
+</div>
+{% endblock %}

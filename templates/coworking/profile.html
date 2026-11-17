@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Личный кабинет — CoWork.Hub{% endblock %}
+
+{% block content %}
+<div class="container">
+  <!-- Page Header -->
+  <header class="section-header text-center">
+    <div class="section-tag">Кабинет резидента</div>
+    <h1 class="section-title">Профиль и мои бронирования</h1>
+    <p class="section-subtitle">
+      Управляйте текущими сессиями, продлевайте время в один клик и просматривайте историю платежей.
+    </p>
+  </header>
+
+  <div class="profile-grid">
+    <!-- Left Column: Resident Profile Card -->
+    <aside class="resident-card" aria-label="Карточка резидента">
+      <div class="avatar-large" aria-hidden="true">
+        {{ resident.first_name|first|default:"С" }}{{ resident.last_name|first|default:"П" }}
+      </div>
+      <h2 class="filter-heading">{{ resident.get_full_name|default:"Станислав Перкакуев" }}</h2>
+      <p class="badge badge-success mb-4">
+        <span class="badge-dot badge-dot-success"></span>
+        {{ resident.get_role_display|default:"Резидент коворкинга" }}
+      </p>
+
+      <div class="summary-row mt-4">
+        <span>Телефон:</span>
+        <strong>{{ resident.phone|default:"+7 (999) 123-45-67" }}</strong>
+      </div>
+      <div class="summary-row">
+        <span>Email:</span>
+        <strong>{{ resident.email|default:"stas@coworkhub.ru" }}</strong>
+      </div>
+      <div class="summary-row">
+        <span>Лицевой баланс:</span>
+        <strong class="text-primary">4 800 ₽</strong>
+      </div>
+      <div class="summary-row">
+        <span>Статус пропуска:</span>
+        <span class="badge badge-info">Активен (PIN 4819)</span>
+      </div>
+
+      <a href="{% url 'coworking:dailypass' %}" class="btn btn-outline btn-block mt-6">
+        Открыть цифровой пропуск →
+      </a>
+      <a href="/admin/" class="btn btn-outline btn-block mt-2" target="_blank" rel="noopener">
+        Панель администратора
+      </a>
+    </aside>
+
+    <!-- Right Column: Active Booking & History Table -->
+    <section aria-label="Активное бронирование и история">
+      <!-- Active Booking Widget -->
+      {% if active_booking %}
+        <article class="active-booking-card" id="activeBookingCard" data-booking-id="{{ active_booking.id }}">
+          <div class="flex-between">
+            <span class="badge badge-success">
+              <span class="badge-dot badge-dot-success"></span> АКТИВНО СЕЙЧАС
+            </span>
+            <span class="form-text">
+              Завершение: <strong id="activeEndTime">{{ active_booking.end_datetime|date:"H:i" }}</strong>
+            </span>
+          </div>
+
+          <h3 class="space-title mt-2">
+            {% if active_booking.workplace %}
+              Стол {{ active_booking.workplace.number }} (Этаж {{ active_booking.workplace.floor }} • {{ active_booking.workplace.get_zone_display }})
+            {% elif active_booking.meeting_room %}
+              Переговорная «{{ active_booking.meeting_room.name }}» (Этаж {{ active_booking.meeting_room.floor }})
+            {% else %}
+              Рабочее место
+            {% endif %}
+          </h3>
+
+          <div class="form-text mt-2">
+            Осталось времени: <strong id="countdownText" class="text-warning">42 минуты</strong>
+          </div>
+
+          <!-- Progress countdown bar -->
+          <div class="countdown-bar">
+            <div class="countdown-fill" id="countdownFill"></div>
+          </div>
+
+          <!-- Action buttons -->
+          <div class="hero-search-form mt-4">
+            <button type="button" class="btn btn-primary" id="btnExtendBooking" data-booking-id="{{ active_booking.id }}">
+              <span class="btn-text">⚡ Продлить на 1 час (350 ₽)</span>
+              <span class="spinner is-hidden" id="extendSpinner"></span>
+            </button>
+            <a href="{% url 'coworking:dailypass' %}" class="btn btn-secondary">
+              🎟️ Показать QR-пропуск
+            </a>
+            <button type="button" class="btn btn-danger-outline" id="btnEndBooking">
+              Завершить
+            </button>
+          </div>
+        </article>
+      {% endif %}
+
+      <!-- Booking History Table (Paginator 20 per page) -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="section-title section-subheading">История бронирований</h2>
+          <span class="form-text">Всего записей: {{ page_obj.paginator.count }}</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table" aria-label="Таблица истории бронирований">
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Пространство</th>
+                <th scope="col">Дата и время</th>
+                <th scope="col">Сумма</th>
+                <th scope="col">Статус</th>
+                <th scope="col">Действие</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for b in page_obj %}
+                <tr>
+                  <td><strong>#BK-{{ b.id }}</strong></td>
+                  <td>
+                    {% if b.workplace %}
+                      Стол {{ b.workplace.number }} ({{ b.workplace.get_zone_display }})
+                    {% elif b.meeting_room %}
+                      Переговорная {{ b.meeting_room.name }}
+                    {% else %}
+                      Рабочее место
+                    {% endif %}
+                  </td>
+                  <td>
+                    {{ b.start_datetime|date:"d.m.Y" }}<br>
+                    <span class="form-text">{{ b.start_datetime|date:"H:i" }} – {{ b.end_datetime|date:"H:i" }}</span>
+                  </td>
+                  <td><strong>{{ b.total_price|floatformat:0 }} ₽</strong></td>
+                  <td>
+                    {% if b.status == 'active' %}
+                      <span class="badge badge-success">Активно</span>
+                    {% elif b.status == 'completed' %}
+                      <span class="badge badge-neutral">Завершено</span>
+                    {% elif b.status == 'cancelled' %}
+                      <span class="badge badge-danger">Отменено</span>
+                    {% else %}
+                      <span class="badge badge-warning">Ожидает оплаты</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if b.daily_pass %}
+                      <a href="{% url 'coworking:dailypass_detail' b.daily_pass.pass_code %}" class="btn btn-outline btn-sm">
+                        Пропуск
+                      </a>
+                    {% else %}
+                      <a href="{% url 'coworking:checkout' b.id %}" class="btn btn-primary btn-sm">
+                        Оплатить
+                      </a>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="6" class="text-center">История бронирований пуста.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination (Requirement: 20 per page) -->
+        {% if page_obj.has_other_pages %}
+          <div class="card-footer">
+            <nav aria-label="Пагинация истории">
+              <ul class="pagination">
+                {% if page_obj.has_previous %}
+                  <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">‹ Назад</a>
+                  </li>
+                {% else %}
+                  <li class="page-item disabled"><span class="page-link">‹ Назад</span></li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                  {% if page_obj.number == num %}
+                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                  {% else %}
+                    <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                  {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                  <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Вперёд ›</a>
+                  </li>
+                {% else %}
+                  <li class="page-item disabled"><span class="page-link">Вперёд ›</span></li>
+                {% endif %}
+              </ul>
+            </nav>
+          </div>
+        {% endif %}
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/api.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,267 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Карта рабочих мест и каталог — CoWork.Hub{% endblock %}
+
+{% block content %}
+<div class="container">
+  <!-- Page Header -->
+  <header class="section-header text-center">
+    <div class="section-tag">Интерактивный план</div>
+    <h1 class="section-title">Карта рабочих мест и переговорных</h1>
+    <p class="section-subtitle">
+      Выберите подходящую рабочую зону на схеме этажа или воспользуйтесь каталогом фильтров ниже.
+    </p>
+  </header>
+
+  <div class="catalog-layout">
+    <!-- 1. Filters Sidebar -->
+    <aside class="filter-panel" aria-label="Фильтры каталога">
+      <h2 class="filter-heading">Фильтры</h2>
+      <form action="{% url 'coworking:catalog' %}" method="get" id="catalogFilterForm">
+        <div class="form-group">
+          <label for="zoneFilter" class="form-label">Рабочая зона</label>
+          <select id="zoneFilter" name="zone" class="form-select">
+            <option value="" {% if not zone_filter %}selected{% endif %}>Все зоны</option>
+            <option value="open_space" {% if zone_filter == 'open_space' %}selected{% endif %}>Open Space (Коворкинг)</option>
+            <option value="quiet_zone" {% if zone_filter == 'quiet_zone' %}selected{% endif %}>Тихая зона (Концентрация)</option>
+            <option value="window_view" {% if zone_filter == 'window_view' %}selected{% endif %}>Места у панорамных окон</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="floorFilter" class="form-label">Этаж</label>
+          <select id="floorFilter" name="floor" class="form-select">
+            <option value="" {% if not floor_filter %}selected{% endif %}>Любой этаж</option>
+            <option value="1" {% if floor_filter == '1' %}selected{% endif %}>1 этаж (Open Space & Окна)</option>
+            <option value="2" {% if floor_filter == '2' %}selected{% endif %}>2 этаж (Тихий зал & Переговорные)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <span class="form-label">Оборудование</span>
+          <label class="form-check">
+            <input type="checkbox" name="has_monitor" value="1" class="form-check-input">
+            <span class="form-check-label">Монитор 4K 27"</span>
+          </label>
+          <label class="form-check">
+            <input type="checkbox" name="has_sockets" value="1" class="form-check-input" checked>
+            <span class="form-check-label">Розетки Type-C / 220V</span>
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Применить</button>
+        <a href="{% url 'coworking:catalog' %}" class="btn btn-outline btn-block mt-2">Сбросить</a>
+      </form>
+    </aside>
+
+    <!-- 2. Interactive Map & Cards -->
+    <section aria-label="Схема этажа и список мест">
+      <!-- Interactive Floor Map Card -->
+      <div class="map-card">
+        <div class="floor-tabs" role="tablist">
+          <button type="button" class="floor-tab active" id="tabFloor1" role="tab" aria-selected="true" data-floor="1">
+            Этаж 1 • Open Space & Окна (8 мест)
+          </button>
+          <button type="button" class="floor-tab" id="tabFloor2" role="tab" aria-selected="false" data-floor="2">
+            Этаж 2 • Тихая зона & Переговорные (7 мест)
+          </button>
+        </div>
+
+        <!-- SVG Map Floor 1 -->
+        <div class="floor-svg-wrap" id="mapFloor1">
+          <svg viewBox="0 0 760 300" width="100%" height="auto" role="img" aria-label="Схема первого этажа коворкинга">
+            <!-- Floor boundary -->
+            <rect x="10" y="10" width="740" height="280" rx="12" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="2"/>
+            
+            <!-- Zones background -->
+            <rect x="30" y="30" width="460" height="240" rx="8" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1.5"/>
+            <text x="45" y="55" font-family="sans-serif" font-size="14" font-weight="bold" fill="#1E40AF">Зона Open Space (Столы А-101 .. А-108)</text>
+
+            <rect x="510" y="30" width="220" height="240" rx="8" fill="#F0FDFA" stroke="#99F6E4" stroke-width="1.5"/>
+            <text x="525" y="55" font-family="sans-serif" font-size="14" font-weight="bold" fill="#0F766E">Панорамные окна (W-105)</text>
+
+            <!-- Desk Pins Floor 1 -->
+            <!-- A-101 -->
+            <g class="map-desk-pin" data-desk="A-101" transform="translate(60, 90)">
+              <rect width="80" height="55" rx="6" fill="#2563EB" opacity="0.9"/>
+              <text x="40" y="26" font-family="sans-serif" font-size="12" font-weight="bold" fill="#FFFFFF" text-anchor="middle">A-101</text>
+              <text x="40" y="44" font-family="sans-serif" font-size="11" fill="#DBEAFE" text-anchor="middle">250 ₽/ч</text>
+            </g>
+            <!-- A-102 -->
+            <g class="map-desk-pin" data-desk="A-102" transform="translate(160, 90)">
+              <rect width="80" height="55" rx="6" fill="#2563EB" opacity="0.9"/>
+              <text x="40" y="26" font-family="sans-serif" font-size="12" font-weight="bold" fill="#FFFFFF" text-anchor="middle">A-102</text>
+              <text x="40" y="44" font-family="sans-serif" font-size="11" fill="#DBEAFE" text-anchor="middle">250 ₽/ч</text>
+            </g>
+            <!-- A-103 -->
+            <g class="map-desk-pin" data-desk="A-103" transform="translate(260, 90)">
+              <rect width="80" height="55" rx="6" fill="#2563EB" opacity="0.9"/>
+              <text x="40" y="26" font-family="sans-serif" font-size="12" font-weight="bold" fill="#FFFFFF" text-anchor="middle">A-103</text>
+              <text x="40" y="44" font-family="sans-serif" font-size="11" fill="#DBEAFE" text-anchor="middle">300 ₽/ч</text>
+            </g>
+            <!-- A-104 -->
+            <g class="map-desk-pin" data-desk="A-104" transform="translate(360, 90)">
+              <rect width="80" height="55" rx="6" fill="#2563EB" opacity="0.9"/>
+              <text x="40" y="26" font-family="sans-serif" font-size="12" font-weight="bold" fill="#FFFFFF" text-anchor="middle">A-104</text>
+              <text x="40" y="44" font-family="sans-serif" font-size="11" fill="#DBEAFE" text-anchor="middle">300 ₽/ч</text>
+            </g>
+
+            <!-- Bottom row desks -->
+            <g class="map-desk-pin" data-desk="A-105" transform="translate(60, 180)">
+              <rect width="80" height="55" rx="6" fill="#2563EB" opacity="0.9"/>
+              <text x="40" y="26" font-family="sans-serif" font-size="12" font-weight="bold" fill="#FFFFFF" text-anchor="middle">A-105</text>
+              <text x="40" y="44" font-family="sans-serif" font-size="11" fill="#DBEAFE" text-anchor="middle">250 ₽/ч</text>
+            </g>
+            <g class="map-desk-pin" data-desk="A-106" transform="translate(160, 180)">
+              <rect width="80" height="55" rx="6" fill="#2563EB" opacity="0.9"/>
+              <text x="40" y="26" font-family="sans-serif" font-size="12" font-weight="bold" fill="#FFFFFF" text-anchor="middle">A-106</text>
+              <text x="40" y="44" font-family="sans-serif" font-size="11" fill="#DBEAFE" text-anchor="middle">250 ₽/ч</text>
+            </g>
+            <!-- Window Desks -->
+            <g class="map-desk-pin" data-desk="W-105" transform="translate(540, 90)">
+              <rect width="160" height="55" rx="6" fill="#0D9488" opacity="0.9"/>
+              <text x="80" y="26" font-family="sans-serif" font-size="12" font-weight="bold" fill="#FFFFFF" text-anchor="middle">W-105 (Окно)</text>
+              <text x="80" y="44" font-family="sans-serif" font-size="11" fill="#CCFBF1" text-anchor="middle">400 ₽/ч • Монитор 4K</text>
+            </g>
+            <g class="map-desk-pin" data-desk="W-106" transform="translate(540, 180)">
+              <rect width="160" height="55" rx="6" fill="#0D9488" opacity="0.9"/>
+              <text x="80" y="26" font-family="sans-serif" font-size="12" font-weight="bold" fill="#FFFFFF" text-anchor="middle">W-106 (Окно)</text>
+              <text x="80" y="44" font-family="sans-serif" font-size="11" fill="#CCFBF1" text-anchor="middle">400 ₽/ч • Монитор 4K</text>
+            </g>
+          </svg>
+        </div>
+
+        <!-- SVG Map Floor 2 (Hidden by default, switched via JS) -->
+        <div class="floor-svg-wrap is-hidden" id="mapFloor2">
+          <svg viewBox="0 0 760 300" width="100%" height="auto" role="img" aria-label="Схема второго этажа коворкинга">
+            <rect x="10" y="10" width="740" height="280" rx="12" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="2"/>
+            <rect x="30" y="30" width="340" height="240" rx="8" fill="#F5F3FF" stroke="#DDD6FE" stroke-width="1.5"/>
+            <text x="45" y="55" font-family="sans-serif" font-size="14" font-weight="bold" fill="#6D28D9">Тихая зона (Концентрация)</text>
+
+            <rect x="390" y="30" width="340" height="240" rx="8" fill="#F0F9FF" stroke="#BAE6FD" stroke-width="1.5"/>
+            <text x="405" y="55" font-family="sans-serif" font-size="14" font-weight="bold" fill="#0369A1">Переговорные комнаты</text>
+
+            <!-- Quiet Desks -->
+            <g class="map-desk-pin" data-desk="B-201" transform="translate(50, 90)">
+              <rect width="130" height="55" rx="6" fill="#7C3AED" opacity="0.9"/>
+              <text x="65" y="26" font-family="sans-serif" font-size="12" font-weight="bold" fill="#FFFFFF" text-anchor="middle">Стол B-201</text>
+              <text x="65" y="44" font-family="sans-serif" font-size="11" fill="#EDE9FE" text-anchor="middle">350 ₽/ч</text>
+            </g>
+            <g class="map-desk-pin" data-desk="B-202" transform="translate(200, 90)">
+              <rect width="130" height="55" rx="6" fill="#7C3AED" opacity="0.9"/>
+              <text x="65" y="26" font-family="sans-serif" font-size="12" font-weight="bold" fill="#FFFFFF" text-anchor="middle">Стол B-202</text>
+              <text x="65" y="44" font-family="sans-serif" font-size="11" fill="#EDE9FE" text-anchor="middle">350 ₽/ч</text>
+            </g>
+
+            <!-- Meeting Rooms -->
+            <g class="map-desk-pin" data-room="Сириус" transform="translate(410, 90)">
+              <rect width="140" height="60" rx="6" fill="#0284C7" opacity="0.9"/>
+              <text x="70" y="26" font-family="sans-serif" font-size="12" font-weight="bold" fill="#FFFFFF" text-anchor="middle">«Сириус» (6 чел)</text>
+              <text x="70" y="46" font-family="sans-serif" font-size="11" fill="#E0F2FE" text-anchor="middle">1 200 ₽/ч</text>
+            </g>
+            <g class="map-desk-pin" data-room="Вега" transform="translate(570, 90)">
+              <rect width="140" height="60" rx="6" fill="#0284C7" opacity="0.9"/>
+              <text x="70" y="26" font-family="sans-serif" font-size="12" font-weight="bold" fill="#FFFFFF" text-anchor="middle">«Вега» (4 чел)</text>
+              <text x="70" y="46" font-family="sans-serif" font-size="11" fill="#E0F2FE" text-anchor="middle">900 ₽/ч</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Spaces Cards List -->
+      <h2 class="section-title section-subheading">
+        Доступные рабочие места ({{ workplaces|length }})
+      </h2>
+
+      <div class="spaces-grid">
+        {% for wp in workplaces %}
+          <article class="space-card" data-zone="{{ wp.zone }}" data-floor="{{ wp.floor }}">
+            <div class="space-img-container">
+              {% if wp.zone == 'open_space' %}
+                <img src="{% static 'img/workplace-openspace.svg' %}" alt="Рабочее место {{ wp.number }}" width="400" height="240" loading="lazy" class="space-img">
+              {% elif wp.zone == 'quiet_zone' %}
+                <img src="{% static 'img/workplace-quiet.svg' %}" alt="Рабочее место {{ wp.number }}" width="400" height="240" loading="lazy" class="space-img">
+              {% else %}
+                <img src="{% static 'img/workplace-window.svg' %}" alt="Рабочее место {{ wp.number }}" width="400" height="240" loading="lazy" class="space-img">
+              {% endif %}
+              <div class="space-status-badge">
+                <span class="badge badge-success">
+                  <span class="badge-dot badge-dot-success"></span> Доступно
+                </span>
+              </div>
+              <div class="space-price-tag">{{ wp.price_per_hour|floatformat:0 }} ₽/час</div>
+            </div>
+
+            <div class="space-body">
+              <h3 class="space-title">Рабочее место {{ wp.number }}</h3>
+              <div class="space-details">
+                <span>{{ wp.floor }} этаж</span>
+                <span>•</span>
+                <span>{{ wp.get_zone_display }}</span>
+              </div>
+              <p class="form-text">
+                {{ wp.description|default:"Комфортное место с эргономичным креслом и скоростным Wi-Fi."|truncatechars:90 }}
+              </p>
+              <div class="space-amenities">
+                {% if wp.has_monitor %}<span class="amenity-tag">🖥️ 4K Монитор</span>{% endif %}
+                {% if wp.has_sockets %}<span class="amenity-tag">⚡ Розетки Type-C</span>{% endif %}
+                <span class="amenity-tag">📶 Wi-Fi 500 Мбит</span>
+              </div>
+              <a href="{% url 'coworking:booking_detail' wp.id %}" class="btn btn-primary btn-block">
+                Забронировать
+              </a>
+            </div>
+          </article>
+        {% empty %}
+          <div class="card card-body">
+            <p>По выбранным фильтрам мест не найдено.</p>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Meeting Rooms List -->
+      {% if meeting_rooms %}
+        <h2 class="section-title mt-10 section-subheading">
+          Переговорные комнаты ({{ meeting_rooms|length }})
+        </h2>
+        <div class="spaces-grid">
+          {% for room in meeting_rooms %}
+            <article class="space-card">
+              <div class="space-img-container">
+                <img src="{% static 'img/meeting-room.svg' %}" alt="Переговорная {{ room.name }}" width="400" height="240" loading="lazy" class="space-img">
+                <div class="space-status-badge">
+                  <span class="badge badge-info">До {{ room.capacity }} человек</span>
+                </div>
+                <div class="space-price-tag">{{ room.price_per_hour|floatformat:0 }} ₽/час</div>
+              </div>
+              <div class="space-body">
+                <h3 class="space-title">Переговорная «{{ room.name }}»</h3>
+                <div class="space-details">
+                  <span>{{ room.floor }} этаж</span>
+                  <span>•</span>
+                  <span>Оборудование: {{ room.equipment|truncatechars:35 }}</span>
+                </div>
+                <p class="form-text">
+                  {{ room.description|default:"Комната для командных встреч и звонков."|truncatechars:90 }}
+                </p>
+                <div class="space-amenities">
+                  <span class="amenity-tag">📺 4K ТВ 65"</span>
+                  <span class="amenity-tag">🖊️ Маркерная доска</span>
+                </div>
+                <a href="{% url 'coworking:booking_detail' room.id %}?type=room" class="btn btn-primary btn-block">
+                  Забронировать комнату
+                </a>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/catalog_filter.js' %}"></script>
+{% endblock %}
