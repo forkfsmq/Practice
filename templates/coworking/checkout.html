@@ -20,6 +20,12 @@
       <form action="{% url 'coworking:checkout' booking.id %}" method="post" id="checkoutForm" novalidate>
         {% csrf_token %}
 
+        {% if form.errors %}
+          <div class="alert alert-error">
+            <p>Пожалуйста, проверьте введённые данные.</p>
+          </div>
+        {% endif %}
+
         <h2 class="filter-heading">1. Способ оплаты</h2>
         <div class="form-group">
           <label class="form-check card card-body payment-method-card">
