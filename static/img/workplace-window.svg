@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" width="400" height="240">
+  <rect width="400" height="240" fill="#F8FAFC"/>
+  <rect x="20" y="20" width="360" height="200" rx="12" fill="#0D9488" opacity="0.15"/>
+  <circle cx="200" cy="90" r="44" fill="#0D9488" opacity="0.2"/>
+  <g transform="translate(180, 70)" fill="#0D9488">
+    <path d="M4 4h32v32H4V4zm4 4v10h10V8H8zm14 0v10h10V8H22zm-14 14v10h10V22H8zm14 0v10h10V22H22z"/>
+  </g>
+  <text x="200" y="160" font-family="sans-serif" font-size="18" font-weight="bold" fill="#0F172A" text-anchor="middle">Места у окна</text>
+  <text x="200" y="185" font-family="sans-serif" font-size="13" fill="#64748B" text-anchor="middle">Столы W-105 .. W-108 • Панорамный вид</text>
+</svg>

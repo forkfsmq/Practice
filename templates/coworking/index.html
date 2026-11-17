@@ -1,0 +1,267 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}CoWork.Hub — Умный коворкинг в центре Москвы | Бронирование онлайн{% endblock %}
+
+{% block content %}
+<!-- 1. Hero Section -->
+<section class="hero-section" aria-labelledby="hero-title">
+  <div class="container hero-content">
+    <div class="hero-badge">
+      <span class="badge-dot badge-dot-success"></span>
+      Свободно 24 рабочих места и 3 переговорные
+    </div>
+
+    <h1 id="hero-title" class="hero-title">
+      Коворкинг нового поколения в центре Москвы
+    </h1>
+
+    <p class="hero-subtitle">
+      Бронируйте столы в Open Space, тихой зоне или переговорные комнаты онлайн. Честная почасовая сетка, автоматическая скидка 20% на день и мгновенный пропуск в Telegram и Wallet.
+    </p>
+
+    <!-- Quick Search Card -->
+    <div class="hero-search-card">
+      <form action="{% url 'coworking:search' %}" method="get" class="hero-search-form" id="heroSearchForm">
+        <div class="form-group">
+          <label for="searchZone" class="form-label">Тип пространства</label>
+          <select id="searchZone" name="zone" class="form-select">
+            <option value="">Все зоны коворкинга</option>
+            <option value="open_space">Open Space (Этаж 1)</option>
+            <option value="quiet_zone">Тихая зона (Этаж 2)</option>
+            <option value="window_view">Места у окна (Этаж 1-2)</option>
+            <option value="meeting">Переговорные комнаты</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="searchDate" class="form-label">Дата бронирования</label>
+          <input type="date" id="searchDate" name="date" class="form-control" value="2026-11-18">
+        </div>
+
+        <div class="form-group">
+          <label for="searchHours" class="form-label">Длительность</label>
+          <select id="searchHours" name="hours" class="form-select">
+            <option value="1">1 час (пробный)</option>
+            <option value="4">4 часа (полдня)</option>
+            <option value="8" selected>8 часов (день со скидкой -20%)</option>
+            <option value="12">12 часов (полный день)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <button type="submit" class="btn btn-primary btn-block">
+            Найти место
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Quick Features Strip -->
+    <div class="hero-features-bar">
+      <div class="hero-feature-item">
+        <span>⚡ Сетка слотов 08:00–22:00</span>
+      </div>
+      <div class="hero-feature-item">
+        <span>🏷️ Скидка 20% при брони от 6 часов</span>
+      </div>
+      <div class="hero-feature-item">
+        <span>📱 Вход по QR-коду и PIN ячейки</span>
+      </div>
+      <div class="hero-feature-item">
+        <span>☕ Свежий зерновой кофе и Wi-Fi 500 Мбит/с</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. Tariffs Section -->
+<section class="container section-spacing" aria-labelledby="tariffs-title">
+  <div class="section-header">
+    <div class="section-tag">Выгодные условия</div>
+    <h2 id="tariffs-title" class="section-title">Тарифы под любые задачи</h2>
+    <p class="section-subtitle">
+      От разовой работы на час до постоянного фиксированного стола на месяц с юридическим адресом и круглосуточным доступом.
+    </p>
+  </div>
+
+  <div class="tariffs-grid">
+    {% for tariff in tariffs %}
+      <article class="tariff-card {% if tariff.tariff_type == 'daily' %}featured{% endif %}">
+        {% if tariff.tariff_type == 'daily' %}
+          <div class="tariff-ribbon">Хит продаж • Скидка 20%</div>
+        {% endif %}
+
+        <div>
+          <h3 class="tariff-name">{{ tariff.name }}</h3>
+          <div class="tariff-price">
+            {{ tariff.price|floatformat:0 }} ₽
+            <span class="tariff-period">
+              {% if tariff.tariff_type == 'hourly' %}/ час
+              {% elif tariff.tariff_type == 'daily' %}/ день (8ч)
+              {% elif tariff.tariff_type == 'monthly' %}/ месяц
+              {% endif %}
+            </span>
+          </div>
+          <p class="form-text">{{ tariff.description|default:"Доступ ко всей инфраструктуре коворкинга, высокоскоростной Wi-Fi и чай/кофе." }}</p>
+
+          <ul class="tariff-features-list">
+            <li>✓ Доступ в рабочие зоны 08:00 – 22:00</li>
+            <li>✓ Эргономичное кресло и розетки 220V + Type-C</li>
+            <li>✓ Высокоскоростной интернет 500 Мбит/с</li>
+            {% if tariff.tariff_type == 'daily' or tariff.tariff_type == 'monthly' %}
+              <li>✓ Локер для вещей с электронным PIN-кодом</li>
+              <li>✓ Цифровой QR-пропуск в Apple Wallet и Telegram</li>
+            {% endif %}
+            {% if tariff.tariff_type == 'monthly' %}
+              <li>✓ Закреплённое место и 10 часов переговорных</li>
+              <li>✓ Бесплатная печать 100 страниц в месяц</li>
+            {% endif %}
+          </ul>
+        </div>
+
+        <a href="{% url 'coworking:catalog' %}" class="btn {% if tariff.tariff_type == 'daily' %}btn-primary{% else %}btn-outline-primary{% endif %} btn-block">
+          Выбрать тариф
+        </a>
+      </article>
+    {% empty %}
+      <div class="card card-body">
+        <p>Тарифы загружаются из базы данных...</p>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- 3. Popular Workplaces & Meeting Rooms Section -->
+<section class="container section-spacing-sm" aria-labelledby="spaces-title">
+  <div class="section-header">
+    <div class="section-tag">Каталог пространств</div>
+    <h2 id="spaces-title" class="section-title">Рабочие места и переговорные</h2>
+    <p class="section-subtitle">
+      Все места оборудованы скоростным интернетом, эргономичной мебелью и достаточным количеством розеток.
+    </p>
+  </div>
+
+  <div class="spaces-grid">
+    <!-- Workplaces from DB -->
+    {% for wp in popular_workplaces %}
+      <article class="space-card">
+        <div class="space-img-container">
+          {% if wp.zone == 'open_space' %}
+            <img src="{% static 'img/workplace-openspace.svg' %}" alt="Стол {{ wp.number }} в зоне Open Space" width="400" height="240" loading="lazy" class="space-img">
+          {% elif wp.zone == 'quiet_zone' %}
+            <img src="{% static 'img/workplace-quiet.svg' %}" alt="Стол {{ wp.number }} в тихой зоне" width="400" height="240" loading="lazy" class="space-img">
+          {% else %}
+            <img src="{% static 'img/workplace-window.svg' %}" alt="Стол {{ wp.number }} с видом на город" width="400" height="240" loading="lazy" class="space-img">
+          {% endif %}
+          <div class="space-status-badge">
+            <span class="badge badge-success">
+              <span class="badge-dot badge-dot-success"></span> Свободно
+            </span>
+          </div>
+          <div class="space-price-tag">{{ wp.price_per_hour|floatformat:0 }} ₽/час</div>
+        </div>
+
+        <div class="space-body">
+          <h3 class="space-title">Рабочее место {{ wp.number }}</h3>
+          <div class="space-details">
+            <span>Этаж {{ wp.floor }}</span>
+            <span>•</span>
+            <span>{{ wp.get_zone_display }}</span>
+          </div>
+
+          <p class="form-text">
+            {{ wp.description|default:"Комфортное индивидуальное рабочее место для продуктивной работы без отвлечений."|truncatechars:85 }}
+          </p>
+
+          <div class="space-amenities">
+            {% if wp.has_monitor %}<span class="amenity-tag">🖥️ 4K Монитор</span>{% endif %}
+            {% if wp.has_sockets %}<span class="amenity-tag">⚡ Розетки Type-C</span>{% endif %}
+            <span class="amenity-tag">📶 Wi-Fi 500 Мбит</span>
+          </div>
+
+          <a href="{% url 'coworking:booking_detail' wp.id %}" class="btn btn-outline-primary btn-block">
+            Выбрать слоты
+          </a>
+        </div>
+      </article>
+    {% endfor %}
+
+    <!-- Meeting Rooms from DB -->
+    {% for room in meeting_rooms %}
+      <article class="space-card">
+        <div class="space-img-container">
+          <img src="{% static 'img/meeting-room.svg' %}" alt="Переговорная комната {{ room.name }}" width="400" height="240" loading="lazy" class="space-img">
+          <div class="space-status-badge">
+            <span class="badge badge-info">До {{ room.capacity }} человек</span>
+          </div>
+          <div class="space-price-tag">{{ room.price_per_hour|floatformat:0 }} ₽/час</div>
+        </div>
+
+        <div class="space-body">
+          <h3 class="space-title">Переговорная «{{ room.name }}»</h3>
+          <div class="space-details">
+            <span>Этаж {{ room.floor }}</span>
+            <span>•</span>
+            <span>Вместимость: {{ room.capacity }} чел.</span>
+          </div>
+
+          <p class="form-text">
+            {{ room.description|default:"Идеально для встреч с клиентами, презентаций и командных брейнштормов."|truncatechars:85 }}
+          </p>
+
+          <div class="space-amenities">
+            <span class="amenity-tag">📺 4K ТВ 65"</span>
+            <span class="amenity-tag">🖊️ Маркерная доска</span>
+            <span class="amenity-tag">🎙️ Спикерфон</span>
+          </div>
+
+          <a href="{% url 'coworking:booking_detail' room.id %}?type=room" class="btn btn-primary btn-block">
+            Забронировать комнату
+          </a>
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+
+  <div class="text-center mt-10">
+    <a href="{% url 'coworking:catalog' %}" class="btn btn-secondary btn-lg">
+      Посмотреть все 8 столов на интерактивной карте →
+    </a>
+  </div>
+</section>
+
+<!-- 4. Advantages & Workflow Section -->
+<section class="container section-spacing section-spacing-bottom" aria-labelledby="adv-title">
+  <div class="section-header">
+    <div class="section-tag">Преимущества</div>
+    <h2 id="adv-title" class="section-title">Почему резиденты выбирают CoWork.Hub</h2>
+    <p class="section-subtitle">
+      Разработано по стандарту эргономики и цифровой прозрачности.
+    </p>
+  </div>
+
+  <div class="tariffs-grid">
+    <div class="card card-body">
+      <h3>⚡ Почасовая сетка с 08:00 до 22:00</h3>
+      <p class="form-text mt-2">
+        Наглядная матрица свободных и занятых часов исключает пересечение броней. Вы платите ровно за то время, которое вам требуется.
+      </p>
+    </div>
+
+    <div class="card card-body">
+      <h3>🏷️ Автоматическая скидка -20%</h3>
+      <p class="form-text mt-2">
+        При выборе от 6 часов в день калькулятор мгновенно применяет дневной тариф: 8 часов стоят как 6.4 часа без скидки.
+      </p>
+    </div>
+
+    <div class="card card-body">
+      <h3>📱 Вход без администратора</h3>
+      <p class="form-text mt-2">
+        После оплаты вы получаете цифровой пропуск с QR-кодом для турникета и PIN-код от локера. Доступен в Apple Wallet и Telegram.
+      </p>
+    </div>
+  </div>
+</section>
+{% endblock %}

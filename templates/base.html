@@ -1,0 +1,173 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CoWork.Hub — современный коворкинг в центре города. Бронирование рабочих мест и переговорных комнат онлайн по часам и тарифам.">
+  <meta name="theme-color" content="#2563EB">
+  <title>{% block title %}CoWork.Hub — Бронирование рабочих мест и переговорных{% endblock %}</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="{% static 'img/logo.svg' %}">
+
+  <!-- Core Stylesheets (Modular UI Kit Architecture) -->
+  <link rel="stylesheet" href="{% static 'css/variables.css' %}">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components.css' %}">
+  <link rel="stylesheet" href="{% static 'css/pages.css' %}">
+
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  <!-- Site Header & Navigation -->
+  <header class="site-header" role="banner">
+    <div class="container header-container">
+      <a href="{% url 'coworking:index' %}" class="brand-link" aria-label="CoWork.Hub на главную">
+        <span class="brand-icon" aria-hidden="true">CW</span>
+        <span class="brand-name">CoWork<span>.Hub</span></span>
+      </a>
+
+      <!-- Desktop Navigation Menu -->
+      <nav class="main-nav" role="navigation" aria-label="Основное меню">
+        <ul class="nav-list">
+          <li>
+            <a href="{% url 'coworking:index' %}" class="nav-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}">Главная</a>
+          </li>
+          <li>
+            <a href="{% url 'coworking:catalog' %}" class="nav-link {% if request.resolver_match.url_name == 'catalog' %}active{% endif %}">Карта мест</a>
+          </li>
+          <li>
+            <a href="{% url 'coworking:rules' %}" class="nav-link {% if request.resolver_match.url_name == 'rules' %}active{% endif %}">Тарифы и правила</a>
+          </li>
+          <li>
+            <a href="{% url 'coworking:dailypass' %}" class="nav-link {% if request.resolver_match.url_name == 'dailypass' %}active{% endif %}">Пропуск на день</a>
+          </li>
+          <li>
+            <a href="{% url 'coworking:profile' %}" class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">Мой кабинет</a>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- Header Actions -->
+      <div class="header-actions">
+        <a href="{% url 'coworking:catalog' %}" class="btn btn-primary btn-sm desktop-only">Забронировать</a>
+        <a href="/admin/" class="btn btn-outline btn-sm desktop-only" target="_blank" rel="noopener">Админка</a>
+
+        <!-- Mobile Hamburger Button -->
+        <button type="button" class="burger-btn" id="burgerBtn" aria-label="Открыть мобильное меню" aria-expanded="false" aria-controls="mobileDrawer">
+          <span class="burger-line"></span>
+          <span class="burger-line"></span>
+          <span class="burger-line"></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Navigation Drawer -->
+  <div class="mobile-drawer" id="mobileDrawer" role="region" aria-label="Мобильное меню">
+    <ul class="mobile-nav-list">
+      <li>
+        <a href="{% url 'coworking:index' %}" class="mobile-nav-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}">Главная</a>
+      </li>
+      <li>
+        <a href="{% url 'coworking:catalog' %}" class="mobile-nav-link {% if request.resolver_match.url_name == 'catalog' %}active{% endif %}">Карта и каталог мест</a>
+      </li>
+      <li>
+        <a href="{% url 'coworking:rules' %}" class="mobile-nav-link {% if request.resolver_match.url_name == 'rules' %}active{% endif %}">Тарифы и правила</a>
+      </li>
+      <li>
+        <a href="{% url 'coworking:dailypass' %}" class="mobile-nav-link {% if request.resolver_match.url_name == 'dailypass' %}active{% endif %}">Пропуск на день</a>
+      </li>
+      <li>
+        <a href="{% url 'coworking:profile' %}" class="mobile-nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">Мой кабинет</a>
+      </li>
+    </ul>
+    <div class="mobile-actions">
+      <a href="{% url 'coworking:catalog' %}" class="btn btn-primary btn-block">Забронировать место</a>
+      <a href="/admin/" class="btn btn-outline btn-block" target="_blank" rel="noopener">Панель администратора</a>
+    </div>
+  </div>
+
+  <!-- Flash Messages (Django messages framework) -->
+  {% if messages %}
+    <div class="container messages-container" role="status" aria-live="polite">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }}">
+          <span>{{ message }}</span>
+          <button type="button" class="alert-close" aria-label="Закрыть уведомление">&times;</button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Main Content Area -->
+  <main class="main-content" id="main-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Site Footer -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="brand-link">
+            <span class="brand-icon" aria-hidden="true">CW</span>
+            <span class="brand-name brand-name-white">CoWork<span>.Hub</span></span>
+          </div>
+          <p class="footer-desc">
+            Пространство для продуктивной работы, стартапов и переговоров. Умная сетка слотов, прозрачные тарифы и мгновенный доступ по цифровому пропуску.
+          </p>
+          <div class="footer-badges footer-badges-spacing">
+            <span class="badge-system">⚡ Сетка слотов 08:00 – 22:00</span>
+            <span class="badge-system">🛡️ Защита от коллизий</span>
+          </div>
+        </div>
+
+        <div>
+          <h2 class="footer-col-title">Навигация</h2>
+          <ul class="footer-links">
+            <li><a href="{% url 'coworking:index' %}" class="footer-link">Главная</a></li>
+            <li><a href="{% url 'coworking:catalog' %}" class="footer-link">Карта мест</a></li>
+            <li><a href="{% url 'coworking:rules' %}" class="footer-link">Тарифы и скидки</a></li>
+            <li><a href="{% url 'coworking:dailypass' %}" class="footer-link">Гостевой пропуск</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 class="footer-col-title">Резидентам</h2>
+          <ul class="footer-links">
+            <li><a href="{% url 'coworking:profile' %}" class="footer-link">Личный кабинет</a></li>
+            <li><a href="{% url 'coworking:rules' %}" class="footer-link">Правила коворкинга</a></li>
+            <li><a href="/admin/" class="footer-link" target="_blank" rel="noopener">Администрирование</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 class="footer-col-title">Контакты</h2>
+          <ul class="footer-links">
+            <li class="footer-link">📍 г. Москва, ул. Коворкинговая, д. 20</li>
+            <li class="footer-link">📞 +7 (495) 120-20-20</li>
+            <li class="footer-link">✉️ hello@coworkhub.ru</li>
+            <li class="footer-link">🕒 Пн–Вс: 08:00 – 22:00</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>
+          © 2026 CoWork.Hub. Все права защищены. Практическая работа по варианту № 20: «Бронирование мест в коворкинге».
+        </div>
+        <div>
+          Разработчик: Перкакуев С.Д., гр. ИСдо-44
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Core Scripts -->
+  <script src="{% static 'js/main.js' %}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>
